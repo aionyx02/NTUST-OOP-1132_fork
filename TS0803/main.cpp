@@ -6,108 +6,93 @@
 using namespace std;
 
 int main() {
-    int64_t memSize, cmds;
+    int64_t mem_size, cmd_count;
 
-    string inpMethod;
-    int64_t inpPos;
-    string inpType;
+    string inp_method;
+    int64_t inp_pos;
+    string inp_type;
 
-    string inpValueString;
-    int64_t inpValue;
+    string inp_value_string;
+    int64_t inp_value;
 
-    cin >> memSize >> cmds;
-    auto* mems = new uint8_t[memSize];
-    memset(mems, '\0', memSize);
+    cin >> mem_size >> cmd_count;
+    auto* mem = new uint8_t[mem_size + 1]; // store '\0'
+    memset(mem, '\0', mem_size + 1);
 
-    for (int cmd = 0; cmd < cmds; ++cmd) {
-        cin >> inpMethod >> inpPos >> inpType;
+    for (int cmd = 0; cmd < cmd_count; ++cmd) {
+        cin >> inp_method >> inp_pos >> inp_type;
 
-        if (inpMethod == "Set") {
-            if (inpType == "String") {
+        if (inp_method == "Set") {
+            if (inp_type == "String") {
                 cin >> ws;
-                getline(cin, inpValueString);
+                getline(cin, inp_value_string);
 
-                for (size_t i = 0; i < inpValueString.size(); ++i) {
-                    if (inpPos + i >= memSize) {
+                for (size_t i = 0; i < inp_value_string.size(); ++i) {
+                    if (inp_pos + i >= mem_size) {
                         cout << "Violation Access.\n";
                         break;
                     }
-                    mems[inpPos + i] = inpValueString[i];
+                    mem[inp_pos + i] = inp_value_string[i];
                 }
 
-            } else if (inpType == "int") {
-                cin >> inpValue;
+            } else if (inp_type == "int") {
+                cin >> inp_value;
 
-                for (int i = 0; i < 4; ++i, inpValue >>= 8) {
-                    if (inpPos + i >= memSize) {
+                for (int i = 0; i < 4; ++i, inp_value >>= 8) {
+                    if (inp_pos + i >= mem_size) {
                         cout << "Violation Access.\n";
                         break;
                     }
-                    mems[inpPos + i] = inpValue & 0xFF;
+                    mem[inp_pos + i] = inp_value & 0xFF;
                 }
 
-            } else if (inpType == "short") {
-                cin >> inpValue;
+            } else if (inp_type == "short") {
+                cin >> inp_value;
 
-                for (int i = 0; i < 2; ++i, inpValue >>= 8) {
-                    if (inpPos + i >= memSize) {
+                for (int i = 0; i < 2; ++i, inp_value >>= 8) {
+                    if (inp_pos + i >= mem_size) {
                         cout << "Violation Access.\n";
                         break;
                     }
-                    mems[inpPos + i] = inpValue & 0xFF;
+                    mem[inp_pos + i] = inp_value & 0xFF;
                 }
 
-            } else if (inpType == "char") {
-                cin >> inpValue;
-                if (inpPos >= memSize) {
+            } else if (inp_type == "char") {
+                cin >> inp_value;
+                if (inp_pos >= mem_size) {
                     cout << "Violation Access.\n";
                     continue;
                 }
-                mems[inpPos] = inpValue;
+                mem[inp_pos] = inp_value;
             }
         }
 
-        if (inpMethod == "Get") {
-            if (inpPos >= memSize) {
+        if (inp_method == "Get") {
+            if (inp_pos >= mem_size) {
                 cout << "Violation Access.\n";
                 continue;
             }
 
-            if (inpType == "String") {
-                for (size_t i = 0; (inpPos + i < memSize) && (mems[inpPos + i] != '\0'); ++i) {
-                    cout << (static_cast<char>(mems[inpPos + i]));
-                }
-                cout << '\n';
-
-            } else if (inpType == "int") {
-                if (inpPos + 3 >= memSize) {
+            if (inp_type == "String") {
+                cout << mem + inp_pos << '\n';
+            } else if (inp_type == "int") {
+                if (inp_pos + 3 >= mem_size) {
                     cout << "Violation Access.\n";
                     continue;
                 }
 
-                int32_t result = 0;
-                for (int i = 3; i >= 0; --i) {
-                    result = (result << 8) | mems[inpPos + i];
-                }
-                cout << result << '\n';
-
-            } else if (inpType == "short") {
-                if (inpPos + 1 >= memSize) {
+                cout << *reinterpret_cast<int32_t*>(mem + inp_pos) << '\n';
+            } else if (inp_type == "short") {
+                if (inp_pos + 1 >= mem_size) {
                     cout << "Violation Access.\n";
                     continue;
                 }
-
-                int32_t result = 0;
-                for (int i = 1; i >= 0; --i) {
-                    result = (result << 8) | mems[inpPos + i];
-                }
-                cout << result << '\n';
-
-            } else if (inpType == "char") {
-                cout << static_cast<unsigned int>(mems[inpPos]) << '\n';
+                cout << *reinterpret_cast<uint16_t*>(mem + inp_pos) << '\n';
+            } else if (inp_type == "char") {
+                cout << static_cast<unsigned int>(mem[inp_pos]) << '\n';
             }
         }
     }
 
-    delete[] mems;
+    delete[] mem;
 }
