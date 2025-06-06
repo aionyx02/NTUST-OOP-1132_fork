@@ -13,7 +13,7 @@ int main() {
     string inp_type;
 
     string inp_value_string;
-    int64_t inp_value;
+    uint64_t inp_value;
 
     cin >> mem_size >> cmd_count;
     auto* mem = new uint8_t[mem_size + 1]; // store '\0'
@@ -81,7 +81,7 @@ int main() {
                     continue;
                 }
 
-                cout << *reinterpret_cast<int32_t*>(mem + inp_pos) << '\n';
+                cout << *reinterpret_cast<uint32_t*>(mem + inp_pos) << '\n';
             } else if (inp_type == "short") {
                 if (inp_pos + 1 >= mem_size) {
                     cout << "Violation Access.\n";
